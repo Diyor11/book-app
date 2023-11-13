@@ -22,30 +22,31 @@ export const bookApi = api.injectEndpoints({
         };
       },
       transformResponse: (res) => {
+        res.data = res.data.map(item => item?.book)
         return res.data
       },
       providesTags: ["books"],
     }),
     createBook: build.mutation({
-      query: (body, user) => ({
+      query: ({values, user}) => ({
         url: `books`,
         method: "POST",
-        body,
-        headers: keySignGenerator(user, "POST/books", body)
+        body: values,
+        headers: keySignGenerator(user, "POST/books", values)
       }),
       invalidatesTags: ["books"]
     }),
     editBook: build.mutation({
-      query: (body) => ({
-        url: `books`,
-        method: "PUT",
-        body,
+      query: ({values: {id, ...values}, user}) => ({
+        url: `books/${id}`,
+        method: "PATCH",
+        body: {book: values, status: 1},
+        headers: keySignGenerator(user, `PATCH/books/${id}`, {book: values, status: 1})
       }),
       invalidatesTags: ["books"]
     }),
     deleteBook: build.mutation({
       query: (data) => {
-        console.log(keySignGenerator(data.user, `DELETE/books/${data.id}`), data.user)
         return {
           url: `books/${data.id}`,
           method: "DELETE",

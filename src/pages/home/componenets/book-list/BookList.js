@@ -17,8 +17,11 @@ export const BookList = (props) => {
   const { user } = useAuth();
 
   const { data: books, isLoading: booksLoad } = useGetBooksQuery(user);
-  const { data: booksSeach = [], isLoading: searchLoad } =
+  const { data: booksSeach, isLoading: searchLoad } =
     useGetBooksSearchQuery({ serchText, user }, { skip: !serchText });
+
+    console.log(books);
+    
 
   return (
     <BookListWrap>

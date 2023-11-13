@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
-import {Modal as AntdModal, Input} from "antd"
+import React, { useEffect, useMemo } from 'react';
+import {Modal as AntdModal, Input, Spin} from "antd"
 import { ButtonsWrap, CencelButton, FormItem, ModalForm, ModalInputLable, ModalWrap, SubmitButton } from './modal.s';
 import { useDispatch, useSelector } from 'react-redux';
 import { editableSelect, isModalOpen } from '../../../../store/selectors';
-import { setEdiatble, toggleMenu } from '../../../../store/slice/appSlice';
+import { setEdiatble, setNotification, toggleMenu } from '../../../../store/slice/appSlice';
 import { useFormik } from "formik";
 import { isErrorStatus } from "../../../../utils";
 import * as Yup from "yup"
@@ -11,6 +11,7 @@ import { useCreateBookMutation, useEditBookMutation } from '../../../../store/se
 import { useAuth } from '../../../../hooks';
 
 const validationScheme = Yup.object({
+  isbn: Yup.string().required("Iltimos malumot kiring"),
   title: Yup.string().required("Iltimos malumot kiring"),
   author: Yup.string().required("Iltimos malumot kiring"),
   cover: Yup.string().required("Iltimos malumot kiring"),
@@ -19,32 +20,42 @@ const validationScheme = Yup.object({
 })
 
 export const Modal = (props) => {
-  const [createBook] = useCreateBookMutation()
-  const [editBook] = useEditBookMutation()
+  const [createBook, {isLoading: createLoad}] = useCreateBookMutation()
+  const [editBook, {isLoading: editLoad}] = useEditBookMutation()
   const {user} = useAuth()
+  const dispatch = useDispatch()
   const editableData = useSelector(editableSelect)
+  console.log(editableData);
+  
   const formik = useFormik({
     validationSchema: validationScheme,
-    initialValues: {title: "", author: "", cover: "", published: "", pages: ""},
+    initialValues: {title: "", author: "", cover: "", published: "", pages: "", isbn: ""},
     onSubmit: (values) => {
-      console.log("success", values)
       if(editableData) {
-        editBook(values)
+        editBook({values: {...values, id: editableData.id}, user})
         .unwrap()
-        .then(() => {
-
-        }).catch(e => console.log(e))
-      } else {
-        createBook(values)
+          .then(() => {
+            dispatch(setNotification({text: "Muvochiqiyatli yangilandi"}))  
+            dispatch(toggleMenu(false))       
+          }).catch(e =>{
+            console.log(e);
+            
+            dispatch(setNotification({text: e?.data?.message || "Somethinh wrong", type: "error"}))
+          })
+    } else {
+        createBook({values, user})
           .unwrap()
           .then(() => {
-            createBook(values, user)
-          }).catch(e => console.log(e))
+            console.log('success');   
+            dispatch(setNotification({text: "Muvochiqiyatli yaratildi"}))  
+            dispatch(toggleMenu(false))       
+          }).catch(e => dispatch(setNotification({text: e?.data?.message || "Somethinh wrong", type: "error"})))
       }
     }
   })  
   const modalOpen = useSelector(isModalOpen)
-  const dispatch = useDispatch()
+
+  const isLoading = useMemo(() => createLoad || editLoad, [createLoad, editLoad])
 
   useEffect(() => {
     if(editableData?.id) {
@@ -65,6 +76,18 @@ export const Modal = (props) => {
     <ModalWrap>
       <AntdModal title="Create Book" open={modalOpen} footer={false} onCancel={handleCancel}>
         <ModalForm onSubmit={formik.handleSubmit}>
+          <FormItem>
+            <ModalInputLable error={isErrorStatus(formik, "isbn")}>Your isbn</ModalInputLable>
+            <Input 
+              size="large" 
+              value={formik.values["isbn"]} 
+              name="isbn" 
+              onChange={formik.handleChange} 
+              onBlur={formik.handleBlur} 
+              status={isErrorStatus(formik, "isbn") ? "error":""} 
+              placeholder="Your title"
+            />
+          </FormItem>
           <FormItem>
             <ModalInputLable error={isErrorStatus(formik, "title")}>Your title</ModalInputLable>
             <Input 
@@ -127,7 +150,7 @@ export const Modal = (props) => {
           </FormItem>
           <ButtonsWrap >
             <CencelButton onClick={handleCancel}>Cencel</CencelButton>
-            <SubmitButton type="submit">Submit</SubmitButton>
+            <SubmitButton type="submit">{isLoading ? <Spin /> : "Submit"}</SubmitButton>
           </ButtonsWrap> 
         </ModalForm>
       </AntdModal>

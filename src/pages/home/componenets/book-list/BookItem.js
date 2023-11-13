@@ -8,17 +8,17 @@ import { setEdiatble, setNotification, toggleMenu } from '../../../../store/slic
 import { useAuth } from '../../../../hooks'
 
 export const BookItem = (props) => {
-  const {isbn, title, author, cover, published} = props
+  const {isbn, title, author, cover, published, id} = props
   const [deleteBook] = useDeleteBookMutation()
   const dispatch = useDispatch()
   const {user} = useAuth()
 
   const handleDelete = () => {
-    deleteBook({id: isbn, user})
+    deleteBook({id: id, user})
       .unwrap()
       .then(() => dispatch(setNotification({text: "Success deleted book"})))
-      .catch(() => {
-        dispatch(setNotification({text: "Unexpexted error", type: "error"}))
+      .catch((e) => {
+        dispatch(setNotification({text: e?.data?.message || "Unexpexted error", type: "error"}))
       })
   }
 

@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-const initialState = {modalOpen: false, editable: null, serachText: 'search', notification: null}
+const initialState = {modalOpen: false, editable: null, serachText: '', notification: null}
 const slice = createSlice({
   name: 'auth',
   initialState,

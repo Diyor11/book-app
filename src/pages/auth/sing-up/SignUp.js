@@ -31,7 +31,7 @@ const validationScheme = Yup.object({
 export function SignUp(props) {
 
   const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const navigate=  useNavigate()
   const [signUp, {isLoading}] = useSignUpMutation()
   const formik = useFormik({
     validationSchema: validationScheme,
@@ -44,7 +44,6 @@ export function SignUp(props) {
         dispatch(setUser(res.data))
         navigate("/")
         }).catch(err => {
-          console.log(err);
           if(err?.data?.message) 
             dispatch(setNotification({text: err?.data?.message, type: "error"}))
           console.log("error", err)

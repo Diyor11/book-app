@@ -24,29 +24,27 @@ import { setNotification } from "../../../store/slice/appSlice";
 const validationScheme = Yup.object({
   key: Yup.string().required("Iltimos malumot kiring"),
   email: Yup.string().required("Iltimos malumot kiring"),
-  key: Yup.string().required("Iltimos malumot kiring"),
+  secret: Yup.string().required("Iltimos malumot kiring"),
 });
 export const SignIn = (props) => {
-  const navigate = useNavigate()
   const [signIn, {isLoading}] = useSignInMutation();
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const formik = useFormik({
     validationSchema: validationScheme,
-    initialValues: { name: "", email: "", key: "" },
+    initialValues: { secret: "", email: "", key: "" },
     onSubmit: (values) => {
       signIn(values)
         .unwrap()
         .then((res) => {
           dispatch(setUser(res.data));
-          console.log('user dispatched');
-          
           navigate("/")
         })
         .catch((err) => {
           console.log(err);
           if (err?.data?.message)
             dispatch(
-              setNotification({ text: err?.data?.message, type: "error" })
+              setNotification({ text: err?.data?.message || "unexpected error", type: "error" })
             );
           console.log("error", err);
         });
