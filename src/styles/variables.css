@@ -1,0 +1,18 @@
+:root {
+    --white-50: #fefefe;
+    --white-100: #fdfdfd;
+    --white-200: #fcfcfc;
+    --white-500: #f8f8f8;
+  
+    --grey-900: #151515;
+  
+    --purple-500: #6200ee;
+    --purple-50: #efe6fd;
+    --purple-300: #9654f4;
+  
+    --orange-500: #ff4d4f;
+  
+    /* shadow */
+    --body-cart-shadow: 0px 2px 24px rgba(15, 23, 42, 0.02);
+    --sidebar-shadow: 0px 2px 24px rgba(15, 23, 42, 0.02);
+  }
